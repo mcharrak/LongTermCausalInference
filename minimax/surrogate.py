@@ -43,7 +43,8 @@ dimX = dimX + 1 #here "dimX" refers to the dimension of X plus the dimension of 
 #n_epochs = 20
 batch = int(sample_size/10)
 learning_rate = 0.0002
-n_epochs = 40
+#n_epochs = 40
+n_epochs = 2
 
 idx = sys.argv[1]
 

@@ -1,0 +1,7 @@
+
+*.csv
+
+*.csv
+minimax/tmp/
+minimax/logs/
+tmp/

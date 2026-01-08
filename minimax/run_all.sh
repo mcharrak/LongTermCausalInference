@@ -8,9 +8,26 @@ cd "$(dirname "$0")"
 source /share/amine.mcharrak/miniconda3/etc/profile.d/conda.sh
 conda activate /share/amine.mcharrak/conda_envs/ltcinf-r
 
-mkdir -p logs
+mkdir -p tmp logs
 
-# Launch 25 chunks (0..24), each chunk generates 8 indices => 200 total.
+# Clean previous outputs (optional but recommended)
+rm -f tmp/*.csv tmp/*.rda
+
+# ------------------------------------------------------------
+# STEP 0: Generate synthetic data (creates tmp/obs_*.csv, tmp/exp_*.csv)
+# ------------------------------------------------------------
+echo "data generation"
+R --no-save --args < data.R > logs/data.log 2>&1
+
+# Sanity check: ensure data generation succeeded
+if ! ls tmp/obs_1.csv tmp/exp_1.csv >/dev/null 2>&1; then
+  echo "ERROR: data.R did not create tmp/obs_*.csv and tmp/exp_*.csv. See logs/data.log" >&2
+  exit 1
+fi
+
+# ------------------------------------------------------------
+# STEP 1: Run surrogate chunks
+# ------------------------------------------------------------
 pids=()
 for i in $(seq 0 24); do
   echo "chunk $i"
@@ -32,5 +49,10 @@ if [[ "$obs_cnt" -lt "$exp_n" || "$exp_cnt" -lt "$exp_n" ]]; then
   exit 1
 fi
 
-# Run ridge after data generation is complete
+# ------------------------------------------------------------
+# STEP 2: Run ridge
+# ------------------------------------------------------------
 nohup R --no-save < ridge.R > "logs/ridge.log" 2>&1
+wait
+
+echo "done"
